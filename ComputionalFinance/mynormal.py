@@ -3,10 +3,11 @@ import myrandgen as rndgen
 import numpy as np
 
 class NormalDistribution:
+    CONST_MIN = 0.00001
     list_methods = ["Box-Muller", "Polar-Marsaglia"]
-    def __init__(self, method):
+    def __init__(self, method = "Polar-Marsaglia" , seed = 14):
         self.method = method
-        self.__lgm = rndgen.LGMRandomGenerator(14)
+        self.__lgm = rndgen.LGMRandomGenerator(seed)
 
     @property
     def method(self):
@@ -20,20 +21,17 @@ class NormalDistribution:
             raise AttributeError('unknown method for calculating normal distribution')
 
     def generatebyBoxMuller(self, n):
-        '''self.__lgm.generateRdmNumber(n)
-        U = self.__lgm.getRdmNumber().reshape(2, n / 2)
-        myln = np.sqrt(-np.log(U[0]))
-        mycoses = np.cos(2. * np.pi * U[1])
-        mysines = np.sin(2. * np.pi * U[1])
-        z1 = np.multiply(myln, mycoses) * np.sqrt(2)
-        z2 = np.multiply(myln, mysines) * np.sqrt(2)
-        return  np.concatenate([z1, z2])'''
         num = 0
         while num <n:
-            u1 = self.__lgm.getNextRdmNumber();
-            u2 = self.__lgm.getNextRdmNumber();
-            yield np.sqrt(-2 * np.log(u1)) * np.cos(2. * np.pi * u2)
-            yield np.sqrt(-2 * np.log(u1)) * np.sin(2. * np.pi * u2)
+            u1 = max(self.CONST_MIN, self.__lgm.getNextRdmNumber())
+            u2 = max(self.CONST_MIN, self.__lgm.getNextRdmNumber())
+            try:
+                n1 = np.sqrt(-2 * np.log(u1)) * np.cos(2. * np.pi * u2)
+                n2 = np.sqrt(-2 * np.log(u1)) * np.sin(2. * np.pi * u2)
+            except ZeroDivisionError:
+                print(u1, u2)
+            yield n1
+            yield n2
             num += 1
 
     def generatebyPolarMarsaglia(self, n):
@@ -44,13 +42,13 @@ class NormalDistribution:
             v2 = 2*self.__lgm.getNextRdmNumber() - 1
             W = v1*v1 + v2*v2
             lnW = np.log(W)
-            if W<=1:
+            if W<=1 and W> 0 :
                 yield v1* np.sqrt(-2 * lnW / W)
                 yield v2* np.sqrt(-2 * lnW / W)
-                num += 1
-            tot += 1
+                num += 2
+            tot += 2
         perc = num/tot
-        print(' Percentage of uniform numbers used %f' % perc)
+        #print(' Percentage of uniform numbers used %f' % perc)
 
 
     def generateNormalDistribution(self,n):
@@ -60,7 +58,6 @@ class NormalDistribution:
             self.normaldist = self.generatebyPolarMarsaglia(n)
         else:
             raise AttributeError('unknown method for calculating normal distribution')
-
 
     def getRdmNumbers(self):
         return self.normaldist

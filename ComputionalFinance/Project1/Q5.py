@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ### Question 5
+np.seterr(all='raise')
 
 '''
 (a) Generate 5,000 Uniformly distributed random numbers on [0,1].
@@ -26,7 +27,7 @@ plt.hist(nrm1, bins, alpha=0.5)
 plt.title("Histogram of Normal distribution : Box-Muller Method")
 plt.xlabel("Random Number")
 plt.ylabel("Frequency")
-plt.show()
+#plt.show()
 
 '''
 (c) Compute the empirical mean and the standard deviation of the sequence of numbers generated above of part (b).
@@ -50,7 +51,7 @@ plt.hist(nrm2, bins, alpha=0.5)
 plt.title("Histogram of Normal distribution : Polar-Marsaglia Method")
 plt.xlabel("Random Number")
 plt.ylabel("Frequency")
-plt.show()
+#plt.show()
 '''
 (e) Compute the empirical mean and the standard deviation of the sequence of numbers generated above of part
 '''
@@ -62,11 +63,12 @@ print('     c) Std Deviation %f' % wp.stdDeviationfn(nrm2))
 (f) Now compare the efficiencies of the two above-algorithms, by comparing the execution times to generate 5,000 normally distributed random numbers by the two methods. Which one is more efficient?
 '''
 
-N = 1000000000
+#N = 1000000000
+N = 10000
 start_time1 = timeit.default_timer()
 bmnormal = nl.NormalDistribution("Box-Muller")
 bmnormal.generateNormalDistribution(N)
-n1 = list(boxmullernormal.getRdmNumbers())
+n1 = list(bmnormal.getRdmNumbers())
 elapsed1 = timeit.default_timer() - start_time1
 
 
@@ -74,7 +76,7 @@ start_time2 = timeit.default_timer()
 
 pnormal = nl.NormalDistribution("Polar-Marsaglia")
 pnormal.generateNormalDistribution(N)
-n2 = list(polarmarsaglia.getRdmNumbers())
+n2 = list(pnormal.getRdmNumbers())
 
 elapsed2 = timeit.default_timer() - start_time2
 

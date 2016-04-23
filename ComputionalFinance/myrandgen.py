@@ -110,10 +110,11 @@ class LGMRandomGenerator(RandomGenerator):
         RandomGenerator.__init__(self, x0, self.CONST_7POW5, 0, 31)
 
     def specialMod(self, x):
-        if x < self.CONST_2POW31:
+        if x < self.CONST_2POW31 -1:
             return x
         else:
-            return self.specialMod(x >> 31 + (x & (self.CONST_2POW31 -1)))
+            tmp = (x >> 31) + (x & (self.CONST_2POW31 -1))
+            return self.specialMod(tmp)
 
     def generateRdmNumber(self, n):
         flag = False
@@ -144,7 +145,7 @@ class LGMRandomGenerator(RandomGenerator):
 
     def generateRdmNumberByGenerator(self, n):
         num =  0
-        while n < num:
+        while num < n:
             x_temp = self.a * self.xcurr + self.b
             red_xtemp = (x_temp >> 31) + (x_temp & (self.CONST_2POW31 - 1))
             y = self.specialMod(red_xtemp)

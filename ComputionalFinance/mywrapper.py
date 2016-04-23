@@ -2,6 +2,7 @@ __author__ = 'ashwin'
 import sys
 import statistics as stats
 import math
+import numpy as np
 MAX_INT64 = sys.maxsize
 def getCumulativeDistribution(xi, X):
     count = 0
@@ -22,6 +23,25 @@ def meanfn(x):
 def stdDeviationfn(x):
     """Calculates the population standard deviation."""
     return stats.stdev(x)
+
+def cov(a,b):
+    if len(a) != len(b):
+        return
+
+    a_mean = np.mean(a)
+    b_mean = np.mean(b)
+
+    sum = 0
+
+    for i in range(0, len(a)):
+        sum += ((a[i] - a_mean) * (b[i] - b_mean))
+
+    return sum / (len(a) - 1)
+
+
+def mycuberoot(x):
+    return np.piecewise(x, [x >= 0, x < 0], [lambda x: 1.*x**(1/3),lambda x: -1.*((-x)**(1/3))])
+
 
 '''
 
