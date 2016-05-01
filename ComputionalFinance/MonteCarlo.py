@@ -112,3 +112,126 @@ def mc_stockpath(S0, r, sigma, T, ndiv, seed=14):
     return mc_calc_exp(const_drift, const_sigt,z, S0)
 
 
+class MCEuropeanOption:
+    def __init__(self, S0, r, sigma,T, dT, nsims):
+        self.S0 = S0
+        self.__r = r
+        self.__sigma = sigma
+        self.T = T
+        #self.t = t
+        self.dT = dT
+        self.nsims = nsims
+        ndiv = (int)(T / dT)
+        self.ndiv = ndiv
+        self.__tree = np.zeros([nsims, ndiv + 1])
+        #self.__treemaximum = np.zeros([nsims,ndiv+1])
+        self.__disc = np.ones(ndiv+1)
+
+    @property
+    def S0(self):
+        return self.__S0
+
+    @S0.setter
+    def S0(self, S0):
+        if S0 < 0:
+            raise AttributeError('S0 cannot be negative')
+        else:
+            self.__S0 = S0
+    '''
+    @property
+    def t(self):
+        return self.__t
+
+    @t.setter
+    def t(self, t):
+        if t < 0 or t >self.__T:
+            raise AttributeError('t cannot be negative or greater than expiry time T')
+        else:
+            self.__t = t
+    '''
+    @property
+    def T(self):
+        return self.__T
+
+    @T.setter
+    def T(self, T):
+        if T < 0:
+            raise AttributeError('T cannot be negative')
+        else:
+            self.__T = T
+
+    @property
+    def dT(self):
+        return self.__dT
+
+    @dT.setter
+    def dT(self, dT):
+        if dT < 0 or dT > self.__T:
+            raise AttributeError('dT cannot be negative or grater than t')
+        else:
+            self.__dT = dT
+
+    @property
+    def nsims(self):
+        return self.__nsims
+
+    @nsims.setter
+    def nsims(self, nsims):
+        if nsims < 0 or not isinstance(nsims, int):
+            raise AttributeError('n is not positive integer')
+        else:
+            self.__nsims = nsims
+
+    @property
+    def ndiv(self):
+        return self.__ndiv
+
+    @ndiv.setter
+    def ndiv(self, ndiv):
+        if ndiv <= 0 or not isinstance(ndiv, int):
+            raise AttributeError('ndiv is not positive integer')
+        else:
+            self.__ndiv = ndiv
+
+    def setPayOff(self, payoff):
+        self.__payoff = payoff
+
+    def isParamsSet(self):
+        params = [self.__T, self.__dT, self.__r, self.__sigma]
+        return all(v is not None for v in params)
+
+    def preCal_MC(self):
+        if not self.isParamsSet():
+            raise Exception('Required params not set. Initialize correctly')
+        self.__edrift = math.exp((self.__r - self.__sigma ** 2 / 2) * self.__dT)
+        self.__wt = self.__sigma * math.sqrt(self.__dT)
+
+        ert = math.exp(-self.__r * self.__dT)
+        for i in range(self.__ndiv):
+            self.__disc[i + 1] = self.__disc[i] * ert
+
+    def mcStock_t(self, t):
+        z = np.random.normal(0, 1, self.__nsims)
+        yield np.multiply(self.__tree[:, t], np.exp(self.__wt * z)) * self.__edrift
+
+    def mcStockTree(self):
+        self.preCal_MC()
+        self.__tree[:, 0] = self.__S0 * np.ones(self.__nsims)
+        #self.__treemaximum[:,0] = self.__S0*np.ones(self.__nsims)
+        for i in range(1, (self.__ndiv + 1)):
+            self.__tree[:, i] = np.asarray(list(self.mcStock_t(i - 1)))
+            #self.__treemaximum[:,i] = np.maximum(self.__treemaximum[:,(i-1)],self.__tree[:,i])
+
+    def getStrikePrice(self, t):
+        if t > self.__T:
+            raise Exception('t should be less than the Time to expiry T')
+        ind = (int)(t / self.__T * self.__ndiv)
+        return self.__tree[:, ind]
+
+    def getOptionPrice(self,X,t):
+        payOff=self.__payoff(self.__tree[:,self.__ndiv],X)
+        ind = (int)((1- t/self.__T)*self.__ndiv)
+        disc= self.__disc[ind]
+        return  disc*np.mean(payOff), disc*disc*np.var(payOff,ddof=1)/self.__nsims
+
+
