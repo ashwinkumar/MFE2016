@@ -187,7 +187,9 @@ class LeastSquareMC:
         #mynormal = nl.NormalDistribution("Polar-Marsaglia", rndom.randint(10, 10 * self.__ndiv))
         #mynormal.generateNormalDistribution(self.__nsims)
         #z = np.asarray(list(mynormal.getRdmNumbers()))
-        z = np.random.normal(0,1,self.__nsims)
+        z1 = np.random.normal(0,1,self.__nsims/2)
+        z2 = -z1
+        z= np.concatenate((z1,z2))
         #done = object()
         #z = next(ndist, done)
         #while (z is not done):
@@ -229,6 +231,8 @@ class LeastSquareMC:
             b[i] = np.dot(l[i],Y)
             for j in range(self.__k):
                 A[i][j]= np.dot(l[i],l[j])
+        if (np.linalg.det(A) ==0):
+            return ECV
         a = np.dot(np.linalg.inv(A), b)
 
         for i in range(self.__k):
@@ -256,11 +260,7 @@ class LeastSquareMC:
         ECV = np.zeros(self.__nsims)
         curr_time_interval = (int)(t/self.__T*self.__ndiv)
         for i in range(self.__ndiv-1, curr_time_interval,-1):
-
             itm_ind = np.asarray(self.__inthemoney(self.__tree[:,i],X)).flatten()
-            #ind =self.getInd(i,X,ECV)
-            ## Update self.__exercise for ind
-            #np.put(self.__exercise,ind, i)
             x = np.take(self.__tree[:, i],itm_ind)
             exercise_t = np.take( self.__exercise,itm_ind)
             y = np.zeros(len(itm_ind))
@@ -268,15 +268,14 @@ class LeastSquareMC:
                 if exercise_t[j] == -1:
                     y[j]=0
                 else:
-                    #payoff = self.__payoff(self.__tree[itm_ind[j],exercise_t[j]],X)
-                    #dc = self.__disc[exercise_t[j]-i]
                     y[j] = self.__payoff(self.__tree[itm_ind[j],exercise_t[j]],X[itm_ind[j]])*self.__disc[exercise_t[j]-i]
+            if(len(x)==0):
+                continue
+
             ECV = self.getECV(x,y)
             for j in range(len(itm_ind)):
                 if self.__payoff(x[j],X[itm_ind[j]]) > ECV[j]:
                     self.__exercise[itm_ind[j]]=i
-            #ind = self.getInd(x,X,ECV)
-            #np.put(self.__exercise,ind, i)
 
         sum = 0
         for i in range(self.__nsims):

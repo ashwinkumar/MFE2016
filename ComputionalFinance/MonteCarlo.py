@@ -211,7 +211,9 @@ class MCEuropeanOption:
             self.__disc[i + 1] = self.__disc[i] * ert
 
     def mcStock_t(self, t):
-        z = np.random.normal(0, 1, self.__nsims)
+        z1 = np.random.normal(0, 1, self.__nsims/2)
+        z2 = -z1
+        z = np.concatenate((z1, z2))
         yield np.multiply(self.__tree[:, t], np.exp(self.__wt * z)) * self.__edrift
 
     def mcStockTree(self):
