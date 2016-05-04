@@ -259,7 +259,7 @@ class LeastSquareMC:
         self.__exercise[self.__inthemoney(self.__tree[:,self.__ndiv],X)] = self.__ndiv
         ECV = np.zeros(self.__nsims)
         curr_time_interval = (int)(t/self.__T*self.__ndiv)
-        for i in range(self.__ndiv-1, curr_time_interval,-1):
+        for i in range(self.__ndiv-1, curr_time_interval-1,-1):
             itm_ind = np.asarray(self.__inthemoney(self.__tree[:,i],X)).flatten()
             x = np.take(self.__tree[:, i],itm_ind)
             exercise_t = np.take( self.__exercise,itm_ind)
