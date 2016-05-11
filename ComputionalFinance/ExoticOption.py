@@ -410,12 +410,12 @@ class DefaultOption:
         exercise_time,exercise_type = self.getDefaultTime()
         payOff = np.zeros(self.__nsims)
         for i in range(self.__nsims):
-            t = exercise_time[i]
-            disc = math.exp(-r0*t)
+            t =  exercise_time[i]
+            disc = math.exp(-r0*t*self.__dT)
             type = exercise_type[i]
-            if(t <0 ):
+            if( type ==0 ):
                 payOff[i] =0
-            if(type == 1):
+            elif(type == 1):
                 payOff[i]= max(0,self.__L[t]- self.__ephsilon *self.__V[i,t])*disc
             else:
                 payOff[i]= math.fabs(self.__L[t]- self.__ephsilon *self.__V[i,t])*disc
