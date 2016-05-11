@@ -2,7 +2,7 @@ import numpy as np
 import math
 import PoissonJump as jump
 
-
+import matplotlib.pyplot as plt
 class LookBackOption:
 
 
@@ -233,7 +233,7 @@ class DefaultOption:
 
     @ndiv.setter
     def ndiv(self, ndiv):
-        if ndiv <= 0 or not isinstance(ndiv, int):
+        if ndiv <= 0 or not isinstance(ndiv, np.int64):
             raise AttributeError('ndiv is not positive integer')
         else:
             self.__ndiv = ndiv
@@ -351,6 +351,12 @@ class DefaultOption:
             wdt = self.__dT*np.random.normal(0, 1, self.__nsims)
             self.__V[:,i] = np.multiply(self.__V[:,i-1],(1+self.__mu*self.__dT + self.__sigma*wdt + self.__gamma*jdt[:,i]))
 
+        '''
+        t = np.arange(0, self.__T + self.__dT / 2, self.__dT)
+        for i in range(self.__nsims):
+            plt.plot(t,self.__V[i,:])
+        plt.show()
+        '''
     def simulateLoanValue(self):
         if not self.isLoanParamsSet():
             raise Exception('Required params not set. Initialize correctly')
@@ -364,7 +370,7 @@ class DefaultOption:
         self.__ephsilon = ephsilon
         self.__beta = (ephsilon - alpha) / self.__T
 
-        t = np.arange(0,self.__T+self.__dT, self.__dT)
+        t = np.arange(0,self.__T+self.__dT/2, self.__dT)
         self.__q = self.__alpha + self.__beta*t
     '''
     Defualt time Q is the first time at which Vt <= qt*Lt
@@ -400,18 +406,19 @@ class DefaultOption:
 
         return E_t,type
 
-    def getDefaultOptionPrice(self):
+    def getDefaultOptionPrice(self,r0):
         exercise_time,exercise_type = self.getDefaultTime()
         payOff = np.zeros(self.__nsims)
         for i in range(self.__nsims):
             t = exercise_time[i]
+            disc = math.exp(-r0*t)
             type = exercise_type[i]
             if(t <0 ):
                 payOff[i] =0
             if(type == 1):
-                payOff[i]= max(0,self.__L[t]- self.__ephsilon *self.__V[i,t])
+                payOff[i]= max(0,self.__L[t]- self.__ephsilon *self.__V[i,t])*disc
             else:
-                payOff[i]= math.fabs(self.__L[t]- self.__ephsilon *self.__V[i,t])
+                payOff[i]= math.fabs(self.__L[t]- self.__ephsilon *self.__V[i,t])*disc
         return np.mean(payOff), np.var(payOff, ddof=1)/len(payOff)
 
 
@@ -422,5 +429,8 @@ class DefaultOption:
 
     def getExpectedExerciseTime(self):
         exercise_time,_ = self.getDefaultTime()
-        ind  = np.where(exercise_time >0 )
-        return (self.__dT*(exercise_time > 0).sum()) / len(ind)
+        ind  = np.asarray(np.where(exercise_time >0 )).flatten()
+        sum = 0
+        for i in range(len(ind)):
+            sum += exercise_time[ind[i]]
+        return (self.__dT*sum) / len(ind)

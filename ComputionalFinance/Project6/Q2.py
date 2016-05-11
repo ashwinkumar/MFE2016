@@ -33,14 +33,14 @@ l_T = len(T)
 
 r0 = 0.02
 delta = 0.25
-ndiv = 100
-nsims = 100
+ndiv = 12 * T  # 12 months per year
+nsims = 10000
 defaultOptionPrice = np.zeros([l_T,l_l1,l_l2])
 defaultProb = np.zeros([l_T,l_l1,l_l2])
 defaultExerciseTime = np.zeros([l_T,l_l1,l_l2])
 
 for i in range(l_T):
-    def_option= do(T[i],ndiv,nsims)
+    def_option= do(T[i],ndiv[i],nsims)
     for j in range(l_l1):
         def_option.initCollateral(V0, mu, sigma, gamma, lambda1[j])
         def_option.simulateCollateral()
@@ -48,7 +48,7 @@ for i in range(l_T):
             def_option.initLoan(L0, r0, delta, lambda2[k])
             def_option.setThreshold(alpha, ephsilon)
             def_option.simulateLoanValue()
-            defaultOptionPrice[i,j,k],_ = def_option.getDefaultOptionPrice()
+            defaultOptionPrice[i,j,k],_ = def_option.getDefaultOptionPrice(r0)
             defaultProb[i,j,k] = def_option.getDefaultProb()
             defaultExerciseTime[i,j,k] = def_option.getExpectedExerciseTime()
     del def_option
@@ -75,8 +75,8 @@ ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
 # Put a legend to the right of the current axis
 ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-plt.show()
-
+#plt.show()
+plt.savefig("Proj6_2a.png")
 
 
 ## Fixing lambda2 = 0.4
@@ -96,4 +96,5 @@ ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
 # Put a legend to the right of the current axis
 ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-plt.show()
+#plt.show()
+plt.savefig("Proj6_2b.png")
