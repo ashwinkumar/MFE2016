@@ -58,11 +58,12 @@ print('Q1. b) Default Probability  with T = 5 , lambda1 = 0.2, lambda2 = 0.4  = 
 print('Q1. c) Expected Exercise Time  with T = 5 , lambda1 = 0.2, lambda2 = 0.4  = %f' %defaultExerciseTime[2,5,5])
 
 
+### Default Option Price
 ## Fixing lambda1 = 0.2
 fig = plt.figure()
-ax = plt.subplot(111)
-
-plt.title('Default Option Price for lambda1 = 0.2')
+plt.subplots_adjust(hspace=0.5)
+ax = plt.subplot(211)
+plt.title('Default Option Price for $\lambda1$= 0.2')
 plt.xlabel("Time in Years")
 plt.ylabel('Option Price')
 for i in range(l_l2):
@@ -76,12 +77,12 @@ ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 # Put a legend to the right of the current axis
 ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 #plt.show()
-plt.savefig("Proj6_2a.png")
+#plt.savefig("Proj6_2a.png")
 
 
 ## Fixing lambda2 = 0.4
-fig = plt.figure()
-ax = plt.subplot(111)
+#fig = plt.figure()
+ax = plt.subplot(212)
 
 plt.title('Default Option Price for $\lambda2$ = 0.4')
 plt.xlabel("Time in Years")
@@ -97,4 +98,92 @@ ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 # Put a legend to the right of the current axis
 ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 #plt.show()
+plt.savefig("Proj6_2a.png")
+
+
+
+
+###  Default Probability
+## Fixing lambda1 = 0.2
+fig = plt.figure()
+plt.subplots_adjust(hspace=0.5)
+ax = plt.subplot(211)
+plt.title('Default Probability for $\lambda1$= 0.2')
+plt.xlabel("Time in Years")
+plt.ylabel('Probability')
+for i in range(l_l2):
+    ax.plot(T,defaultProb[:,5,i],label = "$\lambda2 = %0.2f$"%lambda2[i])
+
+
+
+box = ax.get_position()
+ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+# Put a legend to the right of the current axis
+ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+#plt.show()
+#plt.savefig("Proj6_2a.png")
+
+
+## Fixing lambda2 = 0.4
+#fig = plt.figure()
+ax = plt.subplot(212)
+
+plt.title('Default Probability for $\lambda2$ = 0.4')
+plt.xlabel("Time in Years")
+plt.ylabel('Probability')
+for i in range(l_l1):
+    ax.plot(T,defaultProb[:,i,5],label = "$\lambda1 = %0.2f$"%lambda1[i])
+
+
+
+box = ax.get_position()
+ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+# Put a legend to the right of the current axis
+ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+#plt.show()
 plt.savefig("Proj6_2b.png")
+
+
+###  Expected Time in Years
+## Fixing lambda1 = 0.2
+fig = plt.figure()
+plt.subplots_adjust(hspace=0.5)
+ax = plt.subplot(211)
+plt.title('Expected Exercise Time for $\lambda1$= 0.2')
+plt.xlabel("Time in Years")
+plt.ylabel('Expected Exercise Time ')
+for i in range(l_l2):
+    ax.plot(T,defaultExerciseTime[:,5,i],label = "$\lambda2 = %0.2f$"%lambda2[i])
+
+
+
+box = ax.get_position()
+ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+# Put a legend to the right of the current axis
+ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+#plt.show()
+#plt.savefig("Proj6_2a.png")
+
+
+## Fixing lambda2 = 0.4
+#fig = plt.figure()
+ax = plt.subplot(212)
+
+plt.title('Expected Exercise Time for $\lambda2$ = 0.4')
+plt.xlabel("Time in Years")
+plt.ylabel('Expected Exercise Time ')
+for i in range(l_l1):
+    ax.plot(T,defaultExerciseTime[:,i,5],label = "$\lambda1 = %0.2f$"%lambda1[i])
+
+
+
+box = ax.get_position()
+ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+# Put a legend to the right of the current axis
+ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+#plt.show()
+plt.savefig("Proj6_2c.png")
