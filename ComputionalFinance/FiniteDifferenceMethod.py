@@ -396,3 +396,107 @@ class FiniteDifferenceMethod:
             num += 1
         return F
 
+
+def EuropeanCallPayOff(St,X):
+    array_zeros = np.zeros(len(St))
+    return np.maximum(St-X,array_zeros)
+
+class CIR_ImplicitFiniteDifferenceMethod:
+    def __init__(self, r0, rbar, kappa, sigma, T, dT):
+        self.__r0 = r0
+        self.__rbar = rbar
+        self.__kappa = kappa
+        self.__sigma = sigma
+        self.T = T
+        self.dT = dT
+
+    def initRate(self, rmin, rmax, dr):
+        self.__rmin = rmin
+        self.__rmax = rmax
+        self.__dr = dr
+        N1 = math.ceil((rmax - self.__r0)/dr)
+        N2 = math.ceil((self.__r0 - rmin)/dr)
+
+        self.__r = np.zeros(N1 + N2 + 1)
+        for i in range(N1 + 1):
+            self.__r[N2 + i] = self.__r0 + i * dr
+
+        for i in range(1, N2 + 1):
+            self.__r[N2 - i] = self.__r0 - i * dr
+        return self.__r, N2
+
+    def isRateTreeCreated(self):
+        params = [self.__rmin, self.__rmax, self.__r0, self.__dr, self.__r]
+        return all(v is not None for v in params)
+
+    @property
+    def T(self):
+        return self.__T
+
+    @T.setter
+    def T(self, T):
+        if T < 0:
+            raise AttributeError('T cannot be negative')
+        else:
+            self.__T = T
+
+    @property
+    def dT(self):
+        return self.__dT
+
+    @dT.setter
+    def dT(self, dT):
+        if dT < 0 or dT > self.__T:
+            raise AttributeError('dT cannot be negative or grater than t')
+        else:
+            self.__dT = dT
+
+    def getCallOptionPrice(self, BP,K):
+        num = 0
+        ndiv = (int)(self.__T / self.__dT)
+        N = len(self.__r)
+        A = np.zeros((N, N), dtype=np.float64)
+        B = np.zeros((N, N), dtype=np.float64)
+
+        for j in range(N-2):
+            for i in range(3):
+                if i ==0:
+                    A[j+1][i+j] = - self.__kappa* self.__rbar/(2*self.__dr) + self.__kappa*(j+1)/2
+                    if j!=0:
+                        B[j][i+j-1] = -1*(self.__sigma**2)*j/(2*self.__dr)
+                        #B[j][i+j-1] = -1*((self.__sigma*j)**2)/(2*self.__dr**2)
+                elif i==1:
+                    A[j+1][i+j] = - self.__dr*(j+1) - 1/self.__dT
+                    if j!=0:
+                        B[j][i+j-1] = -1/self.__dT + (self.__sigma**2)*j/self.__dr
+                        #B[j][i+j-1] = -1/self.__dT + ((self.__sigma*j)**2)/(self.__dr**2)
+                elif i == 2:
+                    A[j+1][i+j] = self.__kappa* self.__rbar/(2*self.__dr) - self.__kappa*(j+1)/2
+                    if j!=0:
+                        B[j][i+j-1] = -1*(self.__sigma**2)*j/(2*self.__dr)
+                        #B[j][i+j-1] = -1*((self.__sigma*j)**2)/(2*self.__dr**2)
+
+        A[0,0] = -1 # was 1 earlier
+        A[0,1] = 1   # was -1 earlier
+        A[0,2] = 0
+        A[(N-1),(N-1)] = 1 # was -1
+        A[(N-1),(N-2)] = -1  # was 1
+        '''
+        B[0,:] = 0
+        B[(N-1),:] = 0
+        '''
+        #Intrinsic = EuropeanCallPayOff(BP,K)
+        F = EuropeanCallPayOff(BP, K)
+        while num <= ndiv:
+            D = np.dot(B, F)
+
+            D[-1] = 0
+            D[0] = BP[1] - BP[0]
+            '''
+            D[0] = 0
+            D[-1] = BP[-1] - BP[-2]
+            '''
+            F = np.dot(np.linalg.inv(A),D)
+            #F = np.dot(np.linalg.inv(A), D)
+            num += 1
+        return F
