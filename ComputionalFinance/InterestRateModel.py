@@ -81,7 +81,7 @@ class CIR(InterestRateModel):
         while (num <= self._ndiv):
             z = np.random.normal(0, 1, self._nsims)
             self.__r[:, num] = self.__r[:, (num - 1)] + self.__kappa * (
-            self.__rbar - self.__r[:, (num - 1)]) * self._dT + self._sigma * np.sqrt(self.__r[:,(num-1)]*self._dT) * z
+            self.__rbar - self.__r[:, (num - 1)]) * self._dT + self._sigma * np.sqrt(np.abs(self.__r[:,(num-1)])*self._dT) * z
             num = num + 1
 
         return self.__r
