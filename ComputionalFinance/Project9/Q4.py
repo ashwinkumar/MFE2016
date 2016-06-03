@@ -11,8 +11,8 @@ r0 = 0.078
 kappa = 0.6
 rbar = 0.08
 sigma = 0.12
-dT = 1/365
-nsims = 100
+dT = 1/360
+nsims = 1000
 ybps = 5
 
 #### Question 4
@@ -26,6 +26,7 @@ cir = IRM.CIR(r0= r0,r_bar=rbar,T=T+10, dT= dT, sigma= sigma, nsims = nsims, kap
 r_sim1 = cir.EulerDiscretize_R()
 
 numerixPPM = PPM.NumerixPrepayment(PV0,WAC,r_sim1,T)
+numerixPPM.setInterestRateModel(cir)
 duration,convexity = numerixPPM.getDurationConvexity(ybps,MBSSecurity)
 
 del cir

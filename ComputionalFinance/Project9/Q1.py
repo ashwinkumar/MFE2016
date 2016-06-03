@@ -3,6 +3,8 @@ import PrePaymentModel as PPM
 import numpy as np
 import timeit
 import matplotlib.pyplot as plt
+from tabulate import tabulate
+import random
 
 import math
 
@@ -15,24 +17,25 @@ r0 = 0.078
 kappa = 0.6
 rbar = 0.08
 sigma = 0.12
-dT = 1/365
-nsims = 10000
-
-
+dT = 1/360
+nsims = 1000
 '''
 (a) Compute the price of the MBS using this model for prepayments. The code should be generic: the user is prompted for
 inputs and the program runs and gives the output.
 '''
+
 start_time1 = timeit.default_timer()
 cir = IRM.CIR(r0= r0,r_bar=rbar,T=T+10, dT= dT, sigma= sigma, nsims = nsims, kappa= kappa)
 r_sim1 = cir.EulerDiscretize_R()
 
 numerixPPM = PPM.NumerixPrepayment(PV0,WAC,r_sim1,T)
+numerixPPM.setInterestRateModel(cir)
 MBSPrice = numerixPPM.MBSPrice()
 del cir
 del numerixPPM
 elapsed1 = timeit.default_timer() - start_time1
 print('a) MBS = %f      ****[%f sec]'%(MBSPrice,elapsed1))
+
 
 '''
 (b) Compute the price of the MBS for the following ranges of the parameters: 𝑘 in 0.3 to 0.9 (in increments of 0.1)
@@ -47,16 +50,20 @@ for i in range(len(kappa_array)):
     cir = IRM.CIR(r0=r0, r_bar=rbar, T=T + 10, dT=dT, sigma=sigma, nsims=nsims, kappa=kappa_array[i])
     r_sim1 = cir.EulerDiscretize_R()
     numerixPPM = PPM.NumerixPrepayment(PV0, WAC, r_sim1, T)
+    numerixPPM.setInterestRateModel(cir)
     MBSPrice[i] = numerixPPM.MBSPrice()
     del cir
     del numerixPPM
 
 plt.xlabel("Kappa")
 plt.ylabel("MBS Price")
-plt.title("MBS Price vs Kappa of CIR Model")
+plt.title("MBS Price [Numerix] vs Kappa of CIR Model")
 plt.plot(kappa_array,MBSPrice)
-plt.savefig("1bfig1")
-print(MBSPrice)
+plt.savefig("fig1b")
+result = np.zeros([2,len(kappa_array)])
+result[0,:]= kappa_array
+result[1,:] = MBSPrice
+print(tabulate(np.transpose(result), headers=["k","MBSPrice-Numerix"]))
 
 
 '''
@@ -73,6 +80,7 @@ for i in range(len(rbar_array)):
     cir = IRM.CIR(r0=r0, r_bar=rbar_array[i], T=T + 10, dT=dT, sigma=sigma, nsims=nsims, kappa=kappa)
     r_sim1 = cir.EulerDiscretize_R()
     numerixPPM = PPM.NumerixPrepayment(PV0, WAC, r_sim1, T)
+    numerixPPM.setInterestRateModel(cir)
     MBSPrice[i] = numerixPPM.MBSPrice()
     del cir
     del numerixPPM
@@ -82,4 +90,8 @@ plt.xlabel("rbar")
 plt.ylabel("MBS Price")
 plt.title("MBS Price vs rbar of CIR Model")
 plt.plot(rbar_array,MBSPrice)
-plt.savefig("1cfig2")
+plt.savefig("fig1c")
+result = np.zeros([2,len(kappa_array)])
+result[0,:]= rbar_array
+result[1,:] = MBSPrice
+print(tabulate(np.transpose(result), headers=["r","MBSPrice-Numerix"]))

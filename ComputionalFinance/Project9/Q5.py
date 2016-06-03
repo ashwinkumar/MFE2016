@@ -14,8 +14,8 @@ r0 = 0.078
 kappa = 0.6
 rbar_array = np.arange(0.03,0.099,0.01)
 sigma = 0.12
-dT = 1/365
-nsims = 100
+dT = 1/360
+nsims = 1000
 
 IO = np.zeros(len(rbar_array))
 PO = np.zeros(len(rbar_array))
@@ -30,6 +30,7 @@ for i in range(len(rbar_array)):
     cir = IRM.CIR(r0= r0,r_bar=rbar_array[i],T=T+10, dT= dT, sigma= sigma, nsims = nsims, kappa= kappa)
     r_sim1 = cir.EulerDiscretize_R()
     numerixPPM = PPM.NumerixPrepayment(PV0, WAC, r_sim1, T)
+    numerixPPM.setInterestRateModel(cir)
     IO[i] = numerixPPM.MBS_IOPrice()
     PO[i] = numerixPPM.MBS_POPrice()
     del numerixPPM

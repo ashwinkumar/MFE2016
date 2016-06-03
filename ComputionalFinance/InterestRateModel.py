@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from scipy.stats import ncx2
-
+import random
 class InterestRateModel:
     def __init__(self, r0,T, dT, sigma,nsims):
         self._r0 =r0
@@ -75,6 +75,7 @@ class CIR(InterestRateModel):
         self.__rbar = r_bar
 
     def EulerDiscretize_R(self):
+        np.random.seed(100)
         self.__r = np.zeros([self._nsims, (self._ndiv + 1)])
         self.__r[:, 0] = self._r0
         num = 1
